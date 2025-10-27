@@ -42,8 +42,10 @@ export class Name {
      * Control characters are not escaped (creating a human-readable string)
      * Users can vary the delimiter character to be used
      */
+
+    // @methodtype conversion-method
     public removeEscapecharacter(original: string, delimiter: string): string {
-    // Reihenfolge ist wichtig: erst "\." zu ".", dann "\\" zu "\"
+    
     const delimiterEscaped = "\\" + this.delimiter;
     return original
         .replaceAll(delimiterEscaped, this.delimiter)
@@ -52,7 +54,7 @@ export class Name {
 
 
 
-
+    // @methodtype conversion-method
     public asString(delimiter: string = this.delimiter): string {
         if (typeof delimiter !== "string" || delimiter.length != 1){
             throw new TypeError("delimiter expected to be a character");
@@ -71,7 +73,7 @@ export class Name {
      * Machine-readable means that from a data string, a Name can be parsed back in
      * The control characters in the data string are the default characters
      */
-
+    // @methodtype conversion-method
     public escapeComponents(): string[] {
         return this.components.map(c => 
             c
@@ -80,16 +82,19 @@ export class Name {
         );
     }
 
+    // @methodtype conversion-method
     public asDataString(): string {
     const escapedComponents = this.escapeComponents(); // nutzt deine Methode
     return escapedComponents.join(DEFAULT_DELIMITER);
     }
 
+    //  @methodtype assertion-method
     public assertCisString(c: string) : void {
         if (typeof c !== "string") {
         throw new TypeError("Component must be a string");
     }
 }
+    // @methodtype assertion-method
     public assertIsValidI(i: number): void {
         if (typeof i !== "number" || !Number.isInteger(i)){
             throw new TypeError("i expected to be Integer");
@@ -101,13 +106,14 @@ export class Name {
 
     }
 
+    // @methodtype get-method
     public getComponent(i: number): string {
         this.assertIsValidI(i);
 
         return this.components[i]
     }
 
-    /** Expects that new Name component c is properly masked */
+    // @methodtype set-method
     public setComponent(i: number, c: string): void {
         this.assertIsValidI(i);
         this.assertCisString(c);
@@ -116,24 +122,25 @@ export class Name {
 
     }
 
-     /** Returns number of components in Name instance */
+    // @methodtypes get-method
      public getNoComponents(): number {
         return this.components.length;
     }
 
-    /** Expects that new Name component c is properly masked */
+    //  @methodtype command
     public insert(i: number, c: string): void {
         this.assertIsValidI(i);
         this.assertCisString(c);
         this.components.splice(i, 0, c);
     }
 
-    /** Expects that new Name component c is properly masked */
+    // @methodtype command
     public append(c: string): void {
         this.assertCisString(c);
         this.components.push(c)
     }
 
+    // @methodtype command
     public remove(i: number): void {
     this.assertIsValidI(i);
     this.components.splice(i, 1);
