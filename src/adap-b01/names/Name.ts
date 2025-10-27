@@ -1,3 +1,7 @@
+import { read } from "fs";
+import { delimiter } from "path";
+import { escape } from "querystring";
+
 export const DEFAULT_DELIMITER: string = '.';
 export const ESCAPE_CHARACTER = '\\';
 
@@ -20,7 +24,17 @@ export class Name {
 
     /** Expects that all Name components are properly masked */
     constructor(other: string[], delimiter?: string) {
-        throw new Error("needs implementation or deletion");
+        if (!Array.isArray(other)){
+            throw new TypeError("Array expected here")
+        }
+        for (const c of other){
+            if (typeof c !== "string"){
+                throw new TypeError("All components must be strings")
+            }
+        }
+
+        this.components = other; 
+        this.delimiter = delimiter ?? DEFAULT_DELIMITER;
     }
 
     /**
@@ -28,45 +42,101 @@ export class Name {
      * Control characters are not escaped (creating a human-readable string)
      * Users can vary the delimiter character to be used
      */
-    public asString(delimiter: string = this.delimiter): string {
-        throw new Error("needs implementation or deletion");
+    public removeEscapecharacter(original: string, delimiter: string): string {
+    // Reihenfolge ist wichtig: erst "\." zu ".", dann "\\" zu "\"
+    const delimiterEscaped = "\\" + this.delimiter;
+    return original
+        .replaceAll(delimiterEscaped, this.delimiter)
+        .replaceAll("\\\\", "\\");
     }
+
+
+
+
+    public asString(delimiter: string = this.delimiter): string {
+        if (typeof delimiter !== "string" || delimiter.length != 1){
+            throw new TypeError("delimiter expected to be a character");
+        }
+        const cleanedComponents = this.components.map(c => this.removeEscapecharacter(c, delimiter));
+
+    // Komponenten verbinden
+        return cleanedComponents.join(delimiter);
+
+
+    }
+
 
     /** 
      * Returns a machine-readable representation of Name instance using default control characters
      * Machine-readable means that from a data string, a Name can be parsed back in
      * The control characters in the data string are the default characters
      */
+
+    public escapeComponents(): string[] {
+        return this.components.map(c => 
+            c
+            .replaceAll("\\", "\\\\")
+            .replaceAll(this.delimiter, "\\" + this.delimiter)
+        );
+    }
+
     public asDataString(): string {
-        throw new Error("needs implementation or deletion");
+    const escapedComponents = this.escapeComponents(); // nutzt deine Methode
+    return escapedComponents.join(DEFAULT_DELIMITER);
+    }
+
+    public assertCisString(c: string) : void {
+        if (typeof c !== "string") {
+        throw new TypeError("Component must be a string");
+    }
+}
+    public assertIsValidI(i: number): void {
+        if (typeof i !== "number" || !Number.isInteger(i)){
+            throw new TypeError("i expected to be Integer");
+        }
+
+        if (i<0 || i>this.components.length) {
+            throw new RangeError("Inted out of bounds");
+        }
+
     }
 
     public getComponent(i: number): string {
-        throw new Error("needs implementation or deletion");
+        this.assertIsValidI(i);
+
+        return this.components[i]
     }
 
     /** Expects that new Name component c is properly masked */
     public setComponent(i: number, c: string): void {
-        throw new Error("needs implementation or deletion");
+        this.assertIsValidI(i);
+        this.assertCisString(c);
+        this.components[i] = c;
+
+
     }
 
      /** Returns number of components in Name instance */
      public getNoComponents(): number {
-        throw new Error("needs implementation or deletion");
+        return this.components.length;
     }
 
     /** Expects that new Name component c is properly masked */
     public insert(i: number, c: string): void {
-        throw new Error("needs implementation or deletion");
+        this.assertIsValidI(i);
+        this.assertCisString(c);
+        this.components.splice(i, 0, c);
     }
 
     /** Expects that new Name component c is properly masked */
     public append(c: string): void {
-        throw new Error("needs implementation or deletion");
+        this.assertCisString(c);
+        this.components.push(c)
     }
 
     public remove(i: number): void {
-        throw new Error("needs implementation or deletion");
+    this.assertIsValidI(i);
+    this.components.splice(i, 1);
     }
 
 }

@@ -8,6 +8,20 @@ describe("Basic initialization tests", () => {
   });
 });
 
+describe("Advanced initialization tests", () => {
+  it("test construction 2", () => {
+    let n: Name = new Name(["oss\\\\", "cs", "fau\\\.", "de"]);
+    expect(n.asString()).toBe("oss\\.cs.fau\..de");
+  });
+});
+
+describe("Ultimate initialization tests", () => {
+  it("test construction 3", () => {
+    let n: Name = new Name(["oss\\\\", "cs", "fau\\\.", "de"]);
+    expect(n.asDataString()).toBe("oss\\\\\\\\.cs.fau\\\\\\..de");
+  });
+});
+
 describe("Basic function tests", () => {
   it("test insert", () => {
     let n: Name = new Name(["oss", "fau", "de"]);
