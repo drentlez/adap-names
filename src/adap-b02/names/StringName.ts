@@ -16,7 +16,6 @@ export class StringName implements Name {
     }
 
     private splitNameIntoComponents(): string[] {
-        console.log(this.name)
 
         const components: string[] = [];
         let currentComponent: string = "";
@@ -101,7 +100,6 @@ export class StringName implements Name {
     }
 
     public isEmpty(): boolean { 
-        console.log(this.removedAll);
         return this.removedAll;
     }
 
@@ -145,7 +143,6 @@ export class StringName implements Name {
 
     public append(c: string): void {
         this.AssertCisString(c);
-        console.log(this.removedAll);
         if (this.removedAll){
             this.name = c;
             this.removedAll = false;

@@ -1,69 +1,85 @@
-import { DEFAULT_DELIMITER, ESCAPE_CHARACTER } from "../common/Printable";
-import { Name } from "./Name";
+import { DEFAULT_DELIMITER } from "../common/Printable";
 import { AbstractName } from "./AbstractName";
+import { Name } from "./Name";
 
 export class StringArrayName extends AbstractName {
 
     protected components: string[] = [];
 
-    constructor(source: string[], delimiter?: string) {
-        super();
-        throw new Error("needs implementation or deletion");
+    constructor(source: string[], delimiter: string = DEFAULT_DELIMITER) {
+        super(delimiter);
+
+        if (!Array.isArray(source)) {
+            throw new TypeError("source must be array");
+        }
+
+        for (const c of source) {
+            if (typeof c !== "string") {
+                throw new TypeError("component must be string");
+            }
+        }
+
+        this.components = [...source];
     }
 
-    public clone(): Name {
-        throw new Error("needs implementation or deletion");
+    private assertCisString(c: string) : void {
+        if (typeof c !== "string") {
+        throw new TypeError("Component must be a string");
+        }
     }
 
-    public asString(delimiter: string = this.delimiter): string {
-        throw new Error("needs implementation or deletion");
-    }
+    private assertIsValidI(i: number): void {
+        if (typeof i !== "number" || !Number.isInteger(i)){
+            throw new TypeError("i expected to be Integer");
+        }
 
-    public asDataString(): string {
-        throw new Error("needs implementation or deletion");
+        if (i<0 || i>(this.getNoComponents() -1)) {
+            throw new RangeError("Inted out of bounds");
+        }
     }
+    private assertIsValidinsert(i: number): void {
+        if (typeof i !== "number" || !Number.isInteger(i)){
+            throw new TypeError("i expected to be Integer");
+        }
 
-    public isEqual(other: Name): boolean {
-        throw new Error("needs implementation or deletion");
-    }
-
-    public getHashCode(): number {
-        throw new Error("needs implementation or deletion");
-    }
-
-    public isEmpty(): boolean {
-        throw new Error("needs implementation or deletion");
-    }
-
-    public getDelimiterCharacter(): string {
-        throw new Error("needs implementation or deletion");
+        if (i<0 || i>(this.getNoComponents())) {
+            throw new RangeError("Inted out of bounds");
+        }
     }
 
     public getNoComponents(): number {
-        throw new Error("needs implementation or deletion");
+        return this.components.length;
     }
 
     public getComponent(i: number): string {
-        throw new Error("needs implementation or deletion");
+        this.assertIsValidI(i);
+        return this.components[i];
     }
 
     public setComponent(i: number, c: string) {
-        throw new Error("needs implementation or deletion");
+        this.assertIsValidI(i);
+        this.assertCisString(c);
+        this.components[i] = c;
     }
 
     public insert(i: number, c: string) {
-        throw new Error("needs implementation or deletion");
+        this.assertIsValidinsert(i);
+        this.assertCisString(c);
+        this.components.splice(i, 0, c);
     }
 
     public append(c: string) {
-        throw new Error("needs implementation or deletion");
+        this.assertCisString(c);
+        this.components.push(c);
     }
 
     public remove(i: number) {
-        throw new Error("needs implementation or deletion");
+        this.assertIsValidI(i);
+        this.components.splice(i, 1);
     }
 
-    public concat(other: Name): void {
-        throw new Error("needs implementation or deletion");
+    protected createInstance(components: string[], delimiter: string): Name {
+        return new StringArrayName([...components], delimiter);
     }
+
 }
