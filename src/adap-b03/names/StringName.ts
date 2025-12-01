@@ -74,7 +74,7 @@ export class StringName extends AbstractName {
             }
             components.push(currentComponent);
             return components;
-        }
+    }
 
     public getNoComponents(): number {
         return this.removedAll ? 0 : this.split().length;
