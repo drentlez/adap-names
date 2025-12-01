@@ -1,3 +1,5 @@
+import { IllegalArgumentException } from "../common/IllegalArgumentException";
+import { InvalidStateException } from "../common/InvalidStateException";
 import { Name } from "../names/Name";
 import { Directory } from "./Directory";
 
@@ -18,6 +20,8 @@ export class Node {
     }
 
     public move(to: Directory): void {
+        IllegalArgumentException.assert(to != null, "to directory is null");
+        InvalidStateException.assert(this.parentNode.hasChildNode(this), "node is not a child of its parent directory");
         this.parentNode.removeChildNode(this);
         to.addChildNode(this);
         this.parentNode = to;
@@ -38,6 +42,8 @@ export class Node {
     }
 
     public rename(bn: string): void {
+        IllegalArgumentException.assert(typeof bn === "string" , "base name is not a string");
+        InvalidStateException.assert(this.parentNode != null, "parent node is null");
         this.doSetBaseName(bn);
     }
 
