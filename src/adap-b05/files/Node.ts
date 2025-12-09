@@ -1,8 +1,9 @@
 import { IllegalArgumentException } from "../common/IllegalArgumentException";
 import { InvalidStateException } from "../common/InvalidStateException";
-
 import { Name } from "../names/Name";
 import { Directory } from "./Directory";
+import { ServiceFailureException } from "../common/ServiceFailureException";
+import { Exception } from "../common/Exception";
 
 export class Node {
 
@@ -21,6 +22,8 @@ export class Node {
     }
 
     public move(to: Directory): void {
+        IllegalArgumentException.assert(to != null, "to directory is null");
+        InvalidStateException.assert(this.parentNode.hasChildNode(this), "node is not a child of its parent directory");
         this.parentNode.removeChildNode(this);
         to.addChildNode(this);
         this.parentNode = to;
@@ -57,7 +60,35 @@ export class Node {
      * @param bn basename of node being searched for
      */
     public findNodes(bn: string): Set<Node> {
-        throw new Error("needs implementation or deletion");
+        const result: Set<Node> = new Set<Node>();
+
+        try {
+            const myBaseName: string = this.getBaseName();
+            if (myBaseName === "" ){
+                const trigger = new InvalidStateException("Base name is empty");
+                throw new ServiceFailureException("Base name is empty", trigger);
+            }
+            if (myBaseName === bn) {
+                result.add(this);
+            }
+        }
+        catch (ex) {
+            if (ex instanceof ServiceFailureException) {
+                throw ex;
+            }
+            throw new ServiceFailureException("Failed to get base name of node", ex as Exception);
+        }
+
+        const maybeChildren = (this as any).childNodes;
+        if (maybeChildren && typeof maybeChildren[Symbol.iterator] === 'function') {
+            for (const child of maybeChildren as Set<Node>) {
+                const foundInChild = child.findNodes(bn);
+                for (const n of foundInChild) {
+                    result.add(n);
+                }
+            }
+        }
+        return result;
     }
 
 }

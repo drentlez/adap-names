@@ -1,6 +1,8 @@
 import { Node } from "./Node";
 import { Directory } from "./Directory";
 import { MethodFailedException } from "../common/MethodFailedException";
+import { IllegalArgumentException } from "../common/IllegalArgumentException";
+import { InvalidStateException } from "../common/InvalidStateException";
 
 enum FileState {
     OPEN,
@@ -21,6 +23,8 @@ export class File extends Node {
     }
 
     public read(noBytes: number): Int8Array {
+        IllegalArgumentException.assert(Number.isInteger(noBytes) && noBytes >= 0, "number of bytes to read is not a non-negative integer");
+                InvalidStateException.assert(this.state === FileState.OPEN, "file is not open");
         let result: Int8Array = new Int8Array(noBytes);
         // do something
 
@@ -44,6 +48,7 @@ export class File extends Node {
     }
 
     public close(): void {
+        InvalidStateException.assert(this.state === FileState.OPEN, "file is not open");
         // do something
     }
 
