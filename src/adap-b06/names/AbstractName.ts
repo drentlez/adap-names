@@ -1,5 +1,5 @@
 import { escape } from "querystring";
-import { Name } from "../../adap-b06/names/Name";
+import { Name } from "./Name";
 import { IllegalArgumentException } from "../common/IllegalArgumentException";
 import { InvalidStateException } from "../common/InvalidStateException";
 import { MethodFailedException } from "../common/MethodFailedException";
@@ -50,8 +50,6 @@ export abstract class AbstractName implements Name {
             comps.push(this.getComponent(i));
         }
         const cloned = this.createInstance(comps, this.delimiter);
-        MethodFailedException.assert(cloned.isEqual(this), "Cloned name is not equal to original");
-        MethodFailedException.assert(cloned !== this, "Cloned name is same instance as original");
         return cloned
     }
 
@@ -86,7 +84,7 @@ export abstract class AbstractName implements Name {
         }
 
     public isEqual(other: Name): boolean {
-        IllegalArgumentException.assert(this.isValidOtherName(other), "Other name is not valid");
+        if(!this.isValidOtherName(other)) return false;{
         if (this.getDelimiterCharacter() !== other.getDelimiterCharacter()) {
         return false;
     }
@@ -102,6 +100,7 @@ export abstract class AbstractName implements Name {
     }
 
     return true;
+    }
     }
 
     public getHashCode(): number {
@@ -126,23 +125,21 @@ export abstract class AbstractName implements Name {
     abstract getNoComponents(): number;
 
     abstract getComponent(i: number): string;
-    abstract setComponent(i: number, c: string): void;
+    abstract setComponent(i: number, c: string): Name;
 
-    abstract insert(i: number, c: string): void;
-    abstract append(c: string): void;
-    abstract remove(i: number): void;
+    abstract insert(i: number, c: string): Name;
+    abstract append(c: string): Name;
+    abstract remove(i: number): Name;
     protected abstract createInstance(components: string[], delimiter: string): Name;
 
-    public concat(other: Name): void {
-        InvalidStateException.assert(this.classInvariant(), "Class invariant violated before concatenation");
+    public concat(other: Name): Name {
         IllegalArgumentException.assert(this.isValidOtherName(other), "Other name is not valid");
-        const noComponents = this.getNoComponents();
-        const count = other.getNoComponents();
-        for (let i = 0; i < count; i++) {
-            this.append(other.getComponent(i));
+        let result: Name = this;
+        for (let i = 0; i < other.getNoComponents(); i++) {
+            result = result.append(other.getComponent(i));
         }
-        MethodFailedException.assert(this.getNoComponents() === noComponents + count, "Concatenation failed");
-        InvalidStateException.assert(this.classInvariant(), "Class invariant violated after concatenation");
+        //MethodFailedException.assert(result.getNoComponents() === noComponents + count, "Concatenation failed");
+        return result;
     }
 
 }

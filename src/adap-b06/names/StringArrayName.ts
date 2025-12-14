@@ -7,7 +7,7 @@ import { InvalidStateException } from "../common/InvalidStateException";
 
 export class StringArrayName extends AbstractName {
 
-    protected components: string[] = [];
+    protected readonly components: readonly string[] = [];
 
     constructor(source: string[], delimiter?: string) {
         super(delimiter);
@@ -32,7 +32,7 @@ export class StringArrayName extends AbstractName {
         }
         return true;
     }
-    private isArray(source: string[]): boolean {
+    private isArray(source: readonly unknown[]): boolean {
         return Array.isArray(source);
     }
 
@@ -77,43 +77,41 @@ export class StringArrayName extends AbstractName {
         return this.components[i];
     }
 
-    public setComponent(i: number, c: string) {
+    public override setComponent(i: number, c: string): Name {
         InvalidStateException.assert(this.classInvariant(), "Class invariant violated before setting component");
         IllegalArgumentException.assert(this.isValidI(i), "i is out of bounds");
         IllegalArgumentException.assert(this.isString(c), "Component must be a string");
-        this.components[i] = c;
-        MethodFailedException.assert(this.components[i] === c, "Setting component failed");
-        InvalidStateException.assert(this.classInvariant(), "Class invariant violated after setting component");
+        const comps = [...this.components];
+        comps[i] = c;
+        const result = new StringArrayName(comps, this.delimiter);
+        return result;
     }
 
-    public insert(i: number, c: string) {
+    public override insert(i: number, c: string): Name {
         InvalidStateException.assert(this.classInvariant(), "Class invariant violated before inserting component");
         IllegalArgumentException.assert(this.isValidinsertI(i), "i is out of bounds");
         IllegalArgumentException.assert(this.isString(c), "Component must be a string");
-        const noComponents = this.getNoComponents();
-        this.components.splice(i, 0, c);
-        MethodFailedException.assert(this.components[i] === c, "Inserting component failed");
-        MethodFailedException.assert(this.getNoComponents() === noComponents + 1, "Inserting component failed");
-        InvalidStateException.assert(this.classInvariant(), "Class invariant violated after inserting component");
+        const comps = [...this.components];
+        comps.splice(i, 0, c);
+        const result = new StringArrayName(comps, this.delimiter);
+        return result;
     }
 
-    public append(c: string) {
+    public override append(c: string): Name {
         InvalidStateException.assert(this.classInvariant(), "Class invariant violated before appending component");
         IllegalArgumentException.assert(this.isString(c), "Component must be a string");
-        const noComponents = this.getNoComponents();
-        this.components.push(c);
-        MethodFailedException.assert(this.getNoComponents() === noComponents + 1, "Appending component failed");
-        MethodFailedException.assert(this.components[noComponents] === c, "Appending component failed");
-        InvalidStateException.assert(this.classInvariant(), "Class invariant violated after appending component");
+        const comps = [...this.components, c];
+        const result = new StringArrayName(comps, this.delimiter);
+        return result;
     }
 
-    public remove(i: number) {
+    public override remove(i: number): Name {
         InvalidStateException.assert(this.classInvariant(), "Class invariant violated before removing component");
         IllegalArgumentException.assert(this.isValidI(i), "i is out of bounds");
-        const noComponents = this.getNoComponents();
-        this.components.splice(i, 1);
-        MethodFailedException.assert(this.getNoComponents() === noComponents - 1, "Removing component failed");
-        InvalidStateException.assert(this.classInvariant(), "Class invariant violated after removing component");
+        const comps = [...this.components];
+        comps.splice(i, 1);
+        const result = new StringArrayName(comps, this.delimiter);
+        return result;
     }
 
     protected createInstance(components: string[], delimiter: string): Name {

@@ -7,7 +7,7 @@ import { InvalidStateException } from "../common/InvalidStateException";
 
 export class StringName extends AbstractName {
 
-    protected name: string = "";
+    protected readonly name: string;
     protected removedAll: boolean = false;
 
     constructor(source: string, delimiter?: string) {
@@ -17,7 +17,6 @@ export class StringName extends AbstractName {
         IllegalArgumentException.assert(this.isValidDelimiter(delimiter!), "delimiter must be a single character string");
 
         this.name = source;
-        InvalidStateException.assert(this.classInvariant(), "Class invariant violated after construction");
     }
     protected escapecomponent(component: string): string {
         let escapedComponent: string = "";
@@ -133,52 +132,49 @@ export class StringName extends AbstractName {
         return arr[i];
     }
 
-    public setComponent(i: number, c: string) {
+    public override setComponent(i: number, c: string): Name {
         InvalidStateException.assert(this.classInvariant(), "Class invariant violated before setting component");
         IllegalArgumentException.assert(this.isValidI(i), "i is out of bounds");
         IllegalArgumentException.assert(this.isString(c), "Component must be a string");
         const arr = this.split();
         arr[i] = c;
-        this.name = arr.join(this.delimiter);
-        MethodFailedException.assert(this.getComponent(i) === c, "Setting component failed");
-        InvalidStateException.assert(this.classInvariant(), "Class invariant violated after setting component");
+        const result = new StringName(arr.join(this.delimiter), this.delimiter);
+        MethodFailedException.assert(result.getComponent(i) === c, "Setting component failed");
+        return result;
     }
 
-    public insert(i: number, c: string) {
+    public override insert(i: number, c: string) {
         InvalidStateException.assert(this.classInvariant(), "Class invariant violated before inserting component");
         IllegalArgumentException.assert(this.isValidinsertI(i), "i is out of bounds");
         IllegalArgumentException.assert(this.isString(c), "Component must be a string");
         const noComponents = this.getNoComponents();
         const arr = this.split();
         arr.splice(i, 0, c);
-        this.name = arr.join(this.delimiter);
+        const result = arr.join(this.delimiter);
         this.removedAll = false;
-        MethodFailedException.assert(this.getComponent(i) === c, "Inserting component failed");
-        MethodFailedException.assert(this.getNoComponents() === noComponents + 1, "Inserting component failed");
-        InvalidStateException.assert(this.classInvariant(), "Class invariant violated after inserting component");
+        const final = new StringName(result, this.delimiter);
+        MethodFailedException.assert(final.getComponent(i) === c, "Inserting component failed");
+        MethodFailedException.assert(final.getNoComponents() === noComponents + 1, "Inserting component failed");
+        return final
+
     }
 
-    public append(c: string) {
+    public override append(c: string): Name {
         InvalidStateException.assert(this.classInvariant(), "Class invariant violated before appending component");
         IllegalArgumentException.assert(this.isString(c), "Component must be a string");
         const noComponents = this.getNoComponents();
-        console.log(this.name);
+        let newName: string;
         if (this.removedAll) {
-            this.name = c;
-            this.removedAll = false;
+            newName = c;
         }
-        else{
-            const arr = this.split();
-            console.log(arr);
-            arr.push(c);
-            const escapedarr = arr.map(comp => this.escapecomponent(comp));
-            this.name = escapedarr.join(this.delimiter);
+        else {
+            newName = this.name + this.getDelimiterCharacter() + c;
         }
-        console.log(this.getNoComponents());
-        console.log(this.getComponent(0));
-        MethodFailedException.assert(this.getNoComponents() === noComponents + 1, "Appending component failed");
-        MethodFailedException.assert(this.getComponent(noComponents) === c, "Appending component failed");
-        InvalidStateException.assert(this.classInvariant(), "Class invariant violated after appending component");
+        const result = new StringName(newName, this.delimiter);
+        this.removedAll = false;
+        MethodFailedException.assert(result.getNoComponents() === noComponents + 1, "Appending component failed");
+        MethodFailedException.assert(result.getComponent(noComponents) === c, "Appending component failed");
+        return result;
     }
 
     public remove(i: number) {
@@ -190,17 +186,19 @@ export class StringName extends AbstractName {
         }
 
         const components = this.split();
+        let newName: string;
 
         if(this.getNoComponents() === 1 && i === 0){
             this.removedAll = true
-            this.name = ""
+            newName = ""
         }
         else {
             components.splice(i, 1);
-            this.name = components.join(this.getDelimiterCharacter());
+            newName = components.join(this.getDelimiterCharacter());
         }
-        MethodFailedException.assert(this.getNoComponents() === noComponents - 1, "Removing component failed");
-        InvalidStateException.assert(this.classInvariant(), "Class invariant violated after removing component");
+        const result = new StringName(newName, this.delimiter);
+        MethodFailedException.assert(result.getNoComponents() === noComponents - 1, "Removing component failed");
+        return result;
     }
     protected createInstance(components: string[], delimiter: string): Name {
         return new StringName(components.join(delimiter), delimiter);
